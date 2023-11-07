@@ -56,6 +56,8 @@ that the robot starts with, or check if there is a ball in the chamber (intake m
 +x and +y Location C and D
 +x and -y Location G and H
 
+# optical ultrasonic gps rotation
+
 A/B = Blue Defense
 C/D = Blue Offense
 E/F = Red Offense
@@ -93,44 +95,79 @@ def strtcheck(): #basing our knowledge on what team we are on and if we are on o
     else:
         team,Pos = "Blue","Off"
     
-# def red_offense_1():
-#     """
-#     This method is to control the robot when it starts in a Red Offensive area. 
-#     The robot will drop its alliance tri-ball in the nearest goal, then go to the 
-#     red match load zone and take a tri-ball. It will then go to the alliance pole
-#     and touch it for the AWP.
-#     """
-#     if not ye_olde_compass.heading 
+class Triball:
+    NONE = 0
+    RED = 1
+    BLUE = 2
+    GREEN = 3
+    UNKNOWN = 4
 
-class Position(int):
-    def __init__(self, value):
-        super().__init__()
-
-    def __add__(self, other):
-        new = super().__add__(other)
-        if new > 360:
-            new -= 360
-        return Position(new)
-    
-    def __sub__(self, other):
-        new = super().__sub__(other)
-        if new < 0:
-            new += 360
-        return Position(new)
-    
-
-def change_heading(desired_position: Position):
+def change_heading(desired_position: int):
     """
     This function is to change the heading of the robot to the desired position.
     """
     current_heading = ye_olde_compass.heading()
-    while not (current_heading > desired_position - 10 and current_heading < desired_position + 10):
+
+    plus10 = (desired_position + 10) if ((desired_position + 10) < 360) else ((desired_position + 10) - 360)
+    minus10 = (desired_position - 10) if ((desired_position - 10) > 0) else ((desired_position - 10) + 360)
+
+    print(plus10, minus10)
+
+    while not (current_heading < plus10 or current_heading > minus10):
+        print(current_heading)
         if current_heading > desired_position:
             drivetrain.turn(RIGHT, 15, PERCENT)
         else:
             drivetrain.turn(LEFT, 15, PERCENT)
             
         current_heading = ye_olde_compass.heading()
+
+def drive_to_center():
+    distance = whiskers.object_distance(MM)
+    print(distance)
+
+    while not (distance > 1580 and distance < 1620):
+        print(distance)
+        if distance < 1600:
+            drivetrain.drive(REVERSE, 50, PERCENT)
+        else:
+            drivetrain.drive(FORWARD, 50, PERCENT)
+            
+        distance = whiskers.object_distance(MM)
+
+def red_offense_1():
+    # change_heading(0)
+
+    # y = ye_olde_compass.y_position(INCHES)
+
+    # while y < 0:
+    #     print(y)
+    #     drivetrain.drive(FORWARD, 15, PERCENT)
+    #     y =  ye_olde_compass.y_position(INCHES)
+
+    print("Driving to center")
+    drive_to_center()
+
+    print("Moving right!")
+    drivetrain.turn_for(LEFT, 45, DEGREES, 15, PERCENT)
+
+def has_triball() -> int:
+    """
+    This function is to check if the robot has a triball in the chamber.
+    """
+    if not eyes.is_near_object():
+        return Triball.NONE
+    
+    if eyes.color() == Color.RED:
+        return Triball.RED
+    
+    elif eyes.color() == Color.GREEN:
+        return Triball.GREEN
+    
+    elif eyes.color() == Color.BLUE:
+        return Triball.BLUE
+
+    return Triball.UNKNOWN
 
 def red_offense(): 
     """
@@ -139,46 +176,22 @@ def red_offense():
     printed = False
     if armlad.position(DEGREES) <=4 or armlad.position(DEGREES) >= 350 and eyes.is_near_object():
         # Make the robot face straight
-        # while ye_olde_compass.heading() < -177:
-        #     drivetrain.turn(LEFT, 10, PERCENT)
+        change_heading(0)
+
+        # Drive forward until we are in the middle of the field, or y = 0
+        drivetrain.drive_for(FORWARD, abs(ye_olde_compass.y_position(MM)), MM, 15, PERCENT)
+
+        # while ye_olde_compass.y_position(MM) < -200:
+        #     drivetrain.drive(FORWARD, 10, PERCENT)
         #     if not printed:
-        #         print("print 1: Turning left; Heading: ",ye_olde_compass.heading())
-        #         printed = True
-        # printed = False
-        # while ye_olde_compass.heading() < -357:
-        #     drivetrain.turn(RIGHT, 10, PERCENT)
+        #         print("print 3: Driving forward; Y Position: ",ye_olde_compass.y_position(MM), "Heading: ",ye_olde_compass.heading())
+
+        change_heading(90)
+        # while ye_olde_compass.heading() < 267:
+        #     drivetrain.turn(LEFT)
         #     if not printed:
-        #         print("print 2: Turning right; Heading: ",ye_olde_compass.heading())
-        #         printed = True
-        # printed = False
+        #         print("print 4: Turning left; Heading: ",ye_olde_compass.heading())
 
-        # current_heading = ye_olde_compass.heading()
-        # while not (current_heading > 350 or current_heading < 10):
-        #     if current_heading > 180:
-        #         drivetrain.turn(RIGHT, 15, PERCENT)
-        #     else:
-        #         drivetrain.turn(LEFT, 15, PERCENT)
-                
-        #     current_heading = ye_olde_compass.heading()
-
-        change_heading(Position(0))
-
-        print("Done with that")
-
- 
-
-        while ye_olde_compass.y_position(MM) < -200:
-            drivetrain.drive(FORWARD, 10, PERCENT)
-            if not printed:
-                print("print 3: Driving forward; Y Position: ",ye_olde_compass.y_position(MM), "Heading: ",ye_olde_compass.heading())
-                printed = True
-        printed = False
-        while ye_olde_compass.heading() < 267:
-            drivetrain.turn(LEFT)
-            if not printed:
-                print("print 4: Turning left; Heading: ",ye_olde_compass.heading())
-                printed = True
-        printed = False
         while ye_olde_compass.heading() > 273:
             drivetrain.turn(RIGHT)
             if not printed:
@@ -194,12 +207,16 @@ def red_offense():
         print("Print 7: End")
 
 def print_test():
-    print("Hello, world!")
+    for i in range(60):
+        print(has_triball())
+        wait(1, SECONDS)
 
 def print_positions():
     while True:
         print("X: ",ye_olde_compass.x_position(MM),"Y: ",ye_olde_compass.y_position(MM),"Heading: ",ye_olde_compass.heading())
+        print("Distance", whiskers.object_distance(MM))
         wait(1,SECONDS)
     
-Thread(print_positions)
-Thread(red_offense)
+# Thread(print_test)
+# Thread(red_offense_1)
+# print the total wattage of all motors
