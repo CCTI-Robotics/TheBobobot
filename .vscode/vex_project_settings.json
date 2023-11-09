@@ -1,13 +1,13 @@
 {
 	"project": {
 		"name": "CompCode_lmao",
-		"slot": 6,
+		"slot": 3,
 		"description": "",
 		"platform": "V5",
 		"creationDate": "Tue, 07 Nov 2023 14:18:27 GMT",
 		"language": "python",
 		"python": {
-			"main": "\\src\\main.py"
+			"main": "src/main.py"
 		},
 		"sdkVersion": "V5_1_0_1_15"
 	},
