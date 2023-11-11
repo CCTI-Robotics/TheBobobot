@@ -41,16 +41,34 @@ controller_1_x_b_buttons_control_motors_stopped = True
 drivetrain_needs_to_be_stopped_controller_1 = False
 
 
+def open_armlad(velocity_percent = 70):
+    # global armlad_moving
+    # armlad_moving = True
+
+    rotation = rotationizer.angle()
+
+    
+
+    # armlad.spin_to_position(500, DEGREES, 50, PERCENT)
+
+    counter = 1
+
+    print("Rotation: ", rotation, "Counter: ", counter)
+    armlad.spin_to_position(3200, DEGREES, velocity_percent, PERCENT, wait=False)
+    rotation = rotationizer.angle()
+    print("Rotation: ", rotation, "Counter: ", counter)
+
+    counter += 1
+
+    # armlad_moving = False
 
 def control_armlad():
     global drivetrain_needs_to_be_stopped_controller_1, controller_1_left_shoulder_control_motors_stopped, controller_1_x_b_buttons_control_motors_stopped, remote_control_code_enabled
     if controller_1.buttonL1.pressing():
-        armlad.set_velocity(300,RPM)
-        armlad.spin_to_position(0,DEGREES,wait=True)
+        armlad.spin_to_position(0,DEGREES,100, PERCENT)
         controller_1_left_shoulder_control_motors_stopped = False
     elif controller_1.buttonL2.pressing():
-        armlad.set_velocity(300,RPM)
-        armlad.spin_to_position(3200,DEGREES,wait=True)
+        open_armlad(100)
         controller_1_left_shoulder_control_motors_stopped = False
     elif not controller_1_left_shoulder_control_motors_stopped:
         armlad.stop()
@@ -150,6 +168,8 @@ class Triball:
     GREEN = 3
     UNKNOWN = 4
 
+
+
 def change_heading(desired_position: int):
     """
     This function is to change the heading of the robot to the desired position.
@@ -187,26 +207,6 @@ def drive_to_center():
     
     driving = False
 
-def open_armlad():
-    # global armlad_moving
-    # armlad_moving = True
-
-    rotation = rotationizer.angle()
-
-    
-
-    # armlad.spin_to_position(500, DEGREES, 50, PERCENT)
-
-    counter = 1
-
-    print("Rotation: ", rotation, "Counter: ", counter)
-    armlad.spin_to_position(3200, DEGREES, 70, PERCENT, wait=False)
-    rotation = rotationizer.angle()
-    print("Rotation: ", rotation, "Counter: ", counter)
-
-    counter += 1
-
-    # armlad_moving = False
 
 def red_offense():
     # change_heading(0)
